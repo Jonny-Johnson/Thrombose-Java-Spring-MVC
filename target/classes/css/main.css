@@ -1,0 +1,41 @@
+body {
+	margin: 40px;
+}
+
+.wrapper {
+	display: grid;
+	grid-template-rows: 80px 80px 80px 80px 80px 80px 80px 80px;
+	grid-template-columns: 80px 80px 80px 80px 80px 80px 80px 80px;
+	grid-gap: 7px;
+	background-color: #fff;
+	color: #444;
+}
+
+.box {
+	border-radius: 5px;
+	/*   padding: 20px; */
+	font-size: 150%;
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.white {
+	background-color: lightgrey;
+	color: #000;
+}
+
+.black {
+	background-color: #000;
+	color: #fff;
+}
+
+.black-piece {
+	background-color: #000;
+	height: 50px;
+	width: 50px;
+	border-radius: 50%;
+	margin: 0 auto;
+	display: inline-block;
+}
