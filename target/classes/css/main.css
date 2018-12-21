@@ -1,17 +1,79 @@
 body {
 	margin: 40px;
+	margin-top: 10px;
 }
 
-.wrapper {
+.drag,
+.drop {
+  font-family: sans-serif;
+  display: inline-block;
+  border-radius: 10px;
+  background: #ccc;
+  position: relative;
+  padding: 30px;
+  text-align: center;
+  vertical-align: top;
+}
+
+
+.unselectable {
+  user-drag: none; 
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.drag {
+  color: #fff;
+  cursor: move;
+  background: #777;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+}
+
+.drop {
+  background: #eee;
+  border-top: 2px solid #ccc;
+  border-left: 2px solid #ccc;
+}
+
+#thrombose-wrapper {
+	display: grid;					
+	grid-template-rows: auto;
+	grid-template-columns: auto auto auto;
+	grid-gap: 10px;	
+}
+
+
+.board-wrapper {
+	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+	
 	display: grid;
-	grid-template-rows: 80px 80px 80px 80px 80px 80px 80px 80px;
-	grid-template-columns: 80px 80px 80px 80px 80px 80px 80px 80px;
-	grid-gap: 7px;
+	grid-template-rows: repeat(8, 65px) 30px;
+	grid-template-columns: 30px repeat(8, 65px);		
 	background-color: #fff;
+	grid-gap: 7px;
 	color: #444;
+	align-items: center;	
+	text-align: center;
+	padding: 0px;
 }
 
-.box {
+.board {
+	display: grid;
+	grid-template-rows: repeat(8, 65px);
+	grid-template-columns: repeat(8, 65px);	
+	grid-column-start: 2; 
+	grid-column-end: 10; 
+	grid-row-start: 1; 
+	grid-row-end: 9;
+	grid-gap: 7px;	
+}
+
+
+.field {	
 	border-radius: 5px;
 	/*   padding: 20px; */
 	font-size: 150%;
@@ -21,21 +83,69 @@ body {
 	align-items: center;
 }
 
-.white {
+.white-field {
 	background-color: lightgrey;
 	color: #000;
 }
 
-.black {
-	background-color: #000;
+.black-field {
+	background-color: #5B5252;
 	color: #fff;
 }
 
-.black-piece {
-	background-color: #000;
-	height: 50px;
-	width: 50px;
-	border-radius: 50%;
-	margin: 0 auto;
+.piece {
+	position: relative;
+	height: 45px;
+	width: 45px;
+	border-radius: 50%;	
+	margin: auto;
 	display: inline-block;
 }
+
+.black-piece {
+	background-color: black;
+	/* border: 2px solid white; */
+}
+
+.white-piece {
+	background-color: #fff;
+	/* border: 2px solid black; */
+}
+
+.queen {
+	position: absolute;
+   	background: #f2e530;
+   	border-radius: 50%;   	
+   	height: 24px;
+   	width: 24px;
+   /*
+    Put top edge and left edge in the center
+   */
+   	top: 50%;
+   	left: 50%;
+	margin: -12px 0 0 -12px;
+	display: inline-block;
+}
+
+
+
+h1, h2 {
+	font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+#serverMsg {
+	resize: none;	
+}
+
+#clientMsg {
+	resize: none;	
+}
+
+
+
+
+
+
+
+
+
