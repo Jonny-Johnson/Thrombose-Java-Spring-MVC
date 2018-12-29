@@ -25,7 +25,7 @@ import com.john.thrombose.Player;
 @Component
 public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 
-	static List<Player> players = new ArrayList<Player>();
+	static List<Player> connections = new ArrayList<Player>();
 	static Checkers game = new Checkers();
 
 	@Override
@@ -44,34 +44,37 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		// determine message type and action. TODO: maybe replace with MessageBroker /
-		// STOMP?
-		System.out.println(clientMessage.charAt(0));
-		if (clientMessage.charAt(0) == "{".toCharArray()[0]) {
-			JsonNode jsonNode;
-			try {
-				jsonNode = objectMapper.readTree(clientMessage);
-				System.out.println(jsonNode.toString());
-				String action = jsonNode.get("action").asText();
-				System.out.println(action);
+		// STOMP?		
 
-				switch (action) {
-				case "move":
-					// check if it's a legal move and respond with an updated pieces array
-					break;
-				case "chatmessage":
-					handleChatMessage(session, clientMessage);
-					break;
-				case "chatname":
-					handleChatNameChange(session, clientMessage);
-					break;
-				default:
-					System.out.println("Error: No message type matched for this message. No action triggered.");
-					break;
+		JsonNode jsonNode;
+		try {
+			jsonNode = objectMapper.readTree(clientMessage);
+			System.out.println(jsonNode.toString());
+			String action = jsonNode.get("action").asText();
+			System.out.println(action);
+
+			switch (action) {
+			case "move":
+				// check if it's a legal move and respond with an updated pieces array
+				break;
+			case "chatmessage":
+				handleChatMessage(session, clientMessage);
+				break;
+			case "chatname":
+				handleChatNameChange(session, clientMessage);
+				break;
+			default:
+				try {
+					throw new Exception("Error: No message type matched for this message. No action triggered.");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				break;
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -108,13 +111,11 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String jsonString = "";
 
-		System.out.println("new json broadcast method");
-
 		ChatMessage broadcastMessage = chatMessage.createBroadcastMessage(sender.toString());
 		ChatMessage senderMessage = chatMessage.createMessageForSender();
 
 		try {
-			for (Player p : players) {
+			for (Player p : connections) {
 				if (!p.equals(sender)) {
 					if (!p.disconnected) {
 						jsonString = objectMapper.writeValueAsString(broadcastMessage);
@@ -131,43 +132,13 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 		}
 	}
 
-	public void broadcast(String message) {
-		try {
-			for (Player p : players) {
-				if (!p.disconnected) {
-					p.session.sendMessage(new TextMessage(message));
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	public void broadcast(String message, Player sender, String messageForSender) {
-		try {
-			for (Player p : players) {
-				if (!p.equals(sender)) {
-					if (!p.disconnected) {
-						p.session.sendMessage(new TextMessage(message));
-					}
-				} else {
-					p.session.sendMessage(new TextMessage(messageForSender));
-				}
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	public void handlePongMessage(WebSocketSession s) {
 
 	}
 
 	static Player getPlayerBySession(WebSocketSession session) {
-		if (players.contains(new Player(session))) {
-			return players.get(players.indexOf(new Player(session)));
+		if (connections.contains(new Player(session))) {
+			return connections.get(connections.indexOf(new Player(session)));
 		} else {
 			return null;
 		}
@@ -176,8 +147,11 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
 		Player player = new Player(session);
-		players.add(player);
+		connections.add(player);
 		game.addPlayer(player);
+
+		NewConnection connection = new NewConnection(session.getRemoteAddress().toString());
+		broadcastChatMessage(connection, player);
 
 		System.out.format("New Session from Endpoint %s! Current Sessions: %n", session.getRemoteAddress().toString());
 		printSessions();
@@ -187,20 +161,22 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		Player player = getPlayerBySession(session);
 		player.disconnected = true;
-		broadcast(String.format("Connection from %s was closed.", session.getRemoteAddress().toString()));
+		game.players.remove(player);
+		connections.remove(player);
+
+		ClosedConnection connection = new ClosedConnection(session.getRemoteAddress().toString());
+		broadcastChatMessage(connection, player);
 
 		System.out.format("Closed Session from Endpoint %s! Current Sessions: %n",
 				session.getRemoteAddress().toString());
 		printSessions();
 	}
-	
-	// static void remove
 
 	private void printSessions() {
-		if (players.size() == 0) {
+		if (connections.size() == 0) {
 			System.out.println("No active sessions");
 		} else
-			for (Player p : players) {
+			for (Player p : connections) {
 				System.out.println(p.session.getRemoteAddress().toString());
 			}
 	}

@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import org.springframework.web.socket.WebSocketSession;
 
-public class Player implements {
+public class Player {
 	public WebSocketSession session;
 	public String name;
 	public enum Color {
@@ -18,9 +18,6 @@ public class Player implements {
 		this.session = session;		
 	}
 
-	
-	broadcast(String.format("New connectiom from %s", session.getRemoteAddress().toString()), new Player(session),
-			String.format("You've successfully connected!%nYour IP: %s", session.getRemoteAddress().toString()));
 
 	
 	@Override
