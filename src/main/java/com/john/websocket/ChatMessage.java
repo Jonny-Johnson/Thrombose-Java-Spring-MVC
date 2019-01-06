@@ -1,8 +1,12 @@
 package com.john.websocket;
 
-public class ChatMessage implements IBroadcastChatMessage {
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class ChatMessage extends Message implements IBroadcastChatMessage {
 	public String action = "chatmessage";
 	public String message;
+	
 	
 	public ChatMessage() {
 		
@@ -12,12 +16,16 @@ public class ChatMessage implements IBroadcastChatMessage {
 		this.message = message;
 	}
 	
-	public ChatMessage createMessageForSender() {
-		return new ChatMessage(String.format("You said: %s", this.message));
+	
+	
+	public String createMessageForSender() {
+		ChatMessage senderMessage = new ChatMessage(String.format("You said: %s", this.message));
+		return senderMessage.createJSONMessage();
 	}
 	
-	public ChatMessage createBroadcastMessage(String sender) {
-		return new ChatMessage(String.format("%s said: %s", sender, this.message));
+	public String createBroadcastMessage(String sender) {
+		ChatMessage broadcastMessage = new ChatMessage(String.format("%s said: %s", sender, this.message));
+		return broadcastMessage.createJSONMessage();
 	}
 
 }

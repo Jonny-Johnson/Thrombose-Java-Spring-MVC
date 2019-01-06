@@ -44,7 +44,7 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		// determine message type and action. TODO: maybe replace with MessageBroker /
-		// STOMP?		
+		// STOMP?
 
 		JsonNode jsonNode;
 		try {
@@ -107,23 +107,31 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 		}
 	}
 
-	public void broadcastChatMessage(IBroadcastChatMessage chatMessage, Player sender) {
-		ObjectMapper objectMapper = new ObjectMapper();
-		String jsonString = "";
+	public void handleUpdatePlayerCount(Player player, UpdatePlayerCount count) {
+		if (count != null) {
+			// send update/notify messages to clients
+			// update
+			broadcastChatMessage(count, player);
 
-		ChatMessage broadcastMessage = chatMessage.createBroadcastMessage(sender.toString());
-		ChatMessage senderMessage = chatMessage.createMessageForSender();
+			// notify
+			// TODO write notify
+		}
+	}
+
+	public void broadcastChatMessage(IBroadcastChatMessage chatMessage, Player sender) {
+		String broadcastMessage = chatMessage.createBroadcastMessage(sender.toString());
+		String senderMessage = chatMessage.createMessageForSender();
+
+		System.out.println(broadcastMessage);
 
 		try {
 			for (Player p : connections) {
 				if (!p.equals(sender)) {
 					if (!p.disconnected) {
-						jsonString = objectMapper.writeValueAsString(broadcastMessage);
-						p.session.sendMessage(new TextMessage(jsonString));
+						p.session.sendMessage(new TextMessage(broadcastMessage));
 					}
 				} else {
-					jsonString = objectMapper.writeValueAsString(senderMessage);
-					p.session.sendMessage(new TextMessage(jsonString));
+					p.session.sendMessage(new TextMessage(senderMessage));
 				}
 			}
 		} catch (IOException e) {
@@ -148,8 +156,13 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 	public void afterConnectionEstablished(WebSocketSession session) {
 		Player player = new Player(session);
 		connections.add(player);
-		game.addPlayer(player);
 
+		// will return UpdatePlayerCount if the count changed after adding the player
+		// will return null otherwise
+		UpdatePlayerCount count = game.addPlayer(player);
+		handleUpdatePlayerCount(player, count);
+
+		// notify all players about the new connection
 		NewConnection connection = new NewConnection(session.getRemoteAddress().toString());
 		broadcastChatMessage(connection, player);
 
@@ -161,9 +174,14 @@ public class ThromboseWebSocketHandler extends AbstractWebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		Player player = getPlayerBySession(session);
 		player.disconnected = true;
-		game.players.remove(player);
-		connections.remove(player);
-
+		
+		// will return UpdatePlayerCount if the count changed after adding the player
+		// will return null otherwise
+		UpdatePlayerCount count = game.removePlayer(player);
+		connections.remove(player);		
+		handleUpdatePlayerCount(player, count);
+		
+		// notify remaining players about the closed connection
 		ClosedConnection connection = new ClosedConnection(session.getRemoteAddress().toString());
 		broadcastChatMessage(connection, player);
 

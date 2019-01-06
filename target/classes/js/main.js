@@ -258,6 +258,11 @@ var chat = new Vue({
 			case "chatmessage":
 				chat.history += (jsObject.message + "\n");
 				break;
+			case "playerCountUpdate":
+				console.log('new player count: ' + jsObject.count);
+				EventBus.$emit('playerCountUpdate', jsObject.count);
+				console.log('event bus fired for player count');
+				break;
 			}			
 						
 		}
@@ -288,8 +293,16 @@ var controls = new Vue({
 			</div>
 		</div>		
 	`,
+	methods: {
+		updatePlayerCount: function(count) {
+			console.log('updatePlayerCount with count: ' + count);
+			this.countPlayers = count;
+		}
+	},
+	created: function() {
+		EventBus.$on('playerCountUpdate', this.updatePlayerCount);
 	}
-)
+})
 
 
 

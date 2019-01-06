@@ -9,14 +9,15 @@ public class ClosedConnection implements IBroadcastChatMessage {
 	}
 
 	@Override
-	public ChatMessage createMessageForSender() {
-		return new ChatMessage("This message shouldn't be sent to anyone as it is intendend for the disconnected party");		
+	public String createMessageForSender() {
+		ChatMessage message = new ChatMessage("This message shouldn't be sent to anyone as it is intendend for the disconnected party");
+		return message.createJSONMessage();
 	}
 
 	@Override
-	public ChatMessage createBroadcastMessage(String sender) {
-		return new ChatMessage(String.format("Connection from %s was closed.", this.remoteAddress));			
-
+	public String createBroadcastMessage(String sender) {
+		ChatMessage message =  new ChatMessage(String.format("Connection from %s was closed.", this.remoteAddress));	
+		return message.createJSONMessage();
 	}
 
 }

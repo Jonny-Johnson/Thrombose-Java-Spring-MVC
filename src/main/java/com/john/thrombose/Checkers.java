@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.john.thrombose.Player.Color;
+import com.john.websocket.UpdatePlayerCount;
 
 public class Checkers {
 
@@ -12,8 +13,22 @@ public class Checkers {
 	public Checkers() {
 
 	}
+	
+	public UpdatePlayerCount removePlayer(Player player) {
+		int oldPlayerCount = players.size();
+		
+		players.remove(player);
+		
+		if (oldPlayerCount != players.size()) {
+			return new UpdatePlayerCount(players.size());
+		} else {
+			return null;
+		}
+	}
 
-	public void addPlayer(Player player) {
+	public UpdatePlayerCount addPlayer(Player player) {
+		int oldPlayerCount = players.size();
+		
 		if (players.contains(player)) {
 			if (!player.disconnected) {
 				try {
@@ -36,7 +51,14 @@ public class Checkers {
 		} else {
 			players.add(player);
 		}
-
+		
+		//check if the player count changed
+		//return null if it didn't
+		if (oldPlayerCount != players.size()) {
+			return new UpdatePlayerCount(players.size());
+		} else {
+			return null;
+		}
 	}
 
 	public void chooseColor(Player player, Color color) {

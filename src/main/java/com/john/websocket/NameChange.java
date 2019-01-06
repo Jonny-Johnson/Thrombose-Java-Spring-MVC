@@ -14,13 +14,13 @@ public class NameChange implements IBroadcastChatMessage {
 		this.oldName = oldName;
 	}
 
-	public ChatMessage createMessageForSender() {
-		return new ChatMessage(String.format("You changed your name to: %s", this.name));
+	public String createMessageForSender() {
+		return new ChatMessage(String.format("You changed your name to: %s", this.name)).createJSONMessage();
 	}
 	
 
-	public ChatMessage createBroadcastMessage(String sender) {
-		return new ChatMessage(String.format("%s changed their name to: %s", this.oldName, this.name));
+	public String createBroadcastMessage(String sender) {
+		return new ChatMessage(String.format("%s changed their name to: %s", this.oldName, this.name)).createJSONMessage();
 	}
 
 }
