@@ -212,12 +212,14 @@ var chat = new Vue({
 		<div>
 			<h1>Chat</h1>
 			<div>
+				Your name: 
 				<input v-model="txtName" @keyup.enter="changeName"></input>
 				<button v-on:click="changeName">Change Name</button>				
 			</div>
 			<textarea rows="30" cols="50" readonly="readonly">{{ history }}</textarea>
 			
 			<div>
+				Message: 
 				<input rows="4" cols="50" v-model="txtMessage" @keyup.enter="send"></input>				
 				<button v-on:click="send">Send</button>
 			</div>

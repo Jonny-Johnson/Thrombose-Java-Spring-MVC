@@ -9,6 +9,7 @@ import com.john.websocket.UpdatePlayerCount;
 public class Checkers {
 
 	public List<Player> players = new ArrayList<Player>();
+	public ChessBoard board = new ChessBoard();
 
 	public Checkers() {
 
